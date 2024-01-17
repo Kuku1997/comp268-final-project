@@ -1,4 +1,3 @@
-import javax.xml.stream.Location;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -34,152 +33,155 @@ public class Control {
 
     public void readInput() {
         Scanner in = new Scanner(System.in);
-        String input = "", output;
+        String input;
         do {
             System.out.print("> ");
             input = in.nextLine();
             // run as long as user does not input the termination phrase "quit/QUIT/Quit"
-            if (input.contains("quit") || input.contains("QUIT") ||
-            input.contains("Quit")) {
+            if (input.contains("quit") || input.contains("QUIT") || input.contains("Quit")) {
                 return;
             }
-            output = runCommand(input);
-            System.out.println(output);
-        } while(true);
+            runCommand(input);
+        } while (true);
     }
 
-    private String runCommand(String input) {
+    private void runCommand(String input) {
         String command = input.toLowerCase();
         String[] commands = command.split(" ");
 
         // Determine what command to run based on user input.
         if (commands[0].equals(actions.get(0))) { // command = "go"
-            return this.movePlayer(commands[commands.length - 1]);
+            this.movePlayer(commands[commands.length - 1]);
         } else if (commands[0].equals(actions.get(1))) { // command = "take"
-            return this.takeItem(commands[commands.length - 1]);
+            this.takeItem(commands[commands.length - 1]);
         } else if (commands[0].equals(actions.get(2))) { // command = "drop"
-            return this.dropItem(commands[commands.length - 1]);
-        } else if (commands[0].equals(actions.get(3)) ||
-                commands[0].equals(actions.get(4))) { // command = "eat" or "drink"
-            return this.useItem(commands[commands.length - 1]);
+            this.dropItem(commands[commands.length - 1]);
+        } else if (commands[0].equals(actions.get(3)) || commands[0].equals(actions.get(4))) { // command = "eat" or "drink"
+            this.useItem(commands[commands.length - 1]);
         } else if (commands[0].equals(actions.get(5))) { // command = "talk"
             talkTo(commands[commands.length - 1]);
         } else if (commands[0].equals(actions.get(6))) { // command = "look"
-            return this.look();
+            this.look();
+        } else { // If command is not recognized.
+            System.out.println("Sorry, I don't understand \"" + commands[0] + "\"");
         }
-
-        // If command is not recognized.
-        return "Sorry, I don't understand \"" + commands[0] + "\"";
-
     }
 
-    public String movePlayer(String direction) {
+    public void movePlayer(String direction) {
         int currentLocationDirectionValue; // value of N,E,S,W for current location.
-        // Convert user input to valid direction value that program will
+        // Converts user input to valid direction value that program will
         // recognize.
         direction = direction.toLowerCase();
         switch (direction) {
             case "north", "n" -> {
-                currentLocationDirectionValue =
-                        user.getCharacterLocation().getNorth();
+                currentLocationDirectionValue = user.getCharacterLocation().getNorth();
                 direction = "north";
             }
             case "east", "e" -> {
-                currentLocationDirectionValue =
-                        user.getCharacterLocation().getEast();
+                currentLocationDirectionValue = user.getCharacterLocation().getEast();
                 direction = "east";
             }
             case "south", "s" -> {
-                currentLocationDirectionValue =
-                        user.getCharacterLocation().getSouth();
+                currentLocationDirectionValue = user.getCharacterLocation().getSouth();
                 direction = "south";
             }
             case "west", "w" -> {
-                currentLocationDirectionValue =
-                        user.getCharacterLocation().getWest();
+                currentLocationDirectionValue = user.getCharacterLocation().getWest();
                 direction = "west";
             }
             default -> {
-                return direction + " is not a valid direction.";
+                System.out.println(direction + " is not a valid direction.");
+                return; // Not a valid direction input. Return method and do not call updateLocation().
             }
-        };
+        }
 
-        // If characterLocation direction value equal -1, there
-        // is no exit in that direction.
+        // If user entered valid direction, updateLocation() will change user's current location.
+        updateLocation(direction, currentLocationDirectionValue);
+
+    }
+
+    // If characterLocation direction value equal -1, there
+    // is no exit in that direction.
+    private void updateLocation(String direction, int currentLocationDirectionValue) {
+        // If currentLocationDirectionValue == -1, that means that there is no exit in that direction.
+        // Prints message letting use know they can't go that way.
         if (currentLocationDirectionValue == -1) {
-            return "You go " + direction + ", but you hit a dead end.";
-        } else {
+            System.out.println("You go " + direction + ", but you hit a dead end.");
+        } else { //Otherwise, update location to location stored in currentLocationDirectionValue.
             user.setCharacterLocation(map.get(currentLocationDirectionValue));
-            return "You go " + direction + " and you are now in the " +
-                    user.getCharacterLocation().getName() + ".";
+            System.out.println("You go " + direction + " and you are now in the "
+                    + user.getCharacterLocation().getName() + ".");
+            // Calls enterNewLocation which will print information about user's new location/
+            enterNewLocation(user.getCharacterLocation());
         }
-
-    }
-
-    private void talkTo(String character) {
-    }
-
-    private String useItem(String item) {
-        // Check to see if item is current in user's inventory
-        if (!user.itemInInventory(item)) {
-            return "Cannot use " + item + " because it is not in your inventory.";
-        }
-        // Call relevant function based on value of 'item' parameter.
-        if (item.equalsIgnoreCase("potion")) {
-            user.shrink();
-            return "You drank the " + item + ". You feel strange and everything around you starts looking" +
-                    "much larger";
-        } else if (item.equalsIgnoreCase("cake")) {
-            user.grow();
-            return "You ate the " + item + ". You feel strange and everything around you starts looking" +
-                    "much smaller";
-        } else if (item.equalsIgnoreCase("lamp")) {
-            user.getCharacterLocation().lightsOn();
-            return "You can now see your surroundings.";
-        } else {
-            return "Sorry, you cannot use " + item + " now.";
-        }
-    }
-
-    private String dropItem(String item) {
-        Locations currentLoc = user.getCharacterLocation();
-        // Check to see if item is currently held in user's inventory.
-        if (user.itemInInventory(item)) {
-            // If so, remove it from user inventory and add it to location inventory.
-            currentLoc.getLocationInventory().add((item));
-            user.getInventory().remove(item);
-            return "You have dropped the " + item;
-        } else {
-            // Else, let user know that item is not currently in their inventory.
-            return "You cannot drop the " + item + " because it is not in your inventory.";
-        }
-    }
-
-    private String takeItem(String item) {
-        Locations currentLoc = user.getCharacterLocation();
-        // Check to see if item is held in user's current location's inventory
-        if (currentLoc.itemInInventory(item)) {
-            // If so, remove it from location inventory and add it to user inventory.
-            user.getInventory().add(item);
-            currentLoc.getLocationInventory().remove(item);
-            return item + " has been added to your inventory";
-        } else {
-            // Else, let user know that item is not available in this location.
-            return "Cannot add the " + item + " to your inventory. It is not present in this location.";
-        }
-    }
-
-    private String look() {
-        return user.getCharacterLocation().getDescription();
     }
 
     private void enterNewLocation(Locations newLocation) {
         System.out.println(newLocation.getDescription());
         System.out.println("You can see the following items: ");
         // Print each item in newLocation inventory
-        for (String item : newLocation.getLocationInventory()){
+        for (String item : newLocation.getLocationInventory()) {
             System.out.println("    -" + item);
         }
+    }
+
+
+    private void talkTo(String character) {
+    }
+
+    private void useItem(String item) {
+        // Check to see if item is current in user's inventory
+        if (!user.itemInInventory(item)) {
+            System.out.println("Cannot use " + item + " because it is not in your inventory.");
+            return;
+        }
+        // Call relevant function based on value of 'item' parameter.
+        if (item.equalsIgnoreCase("potion")) {
+            user.shrink();
+            System.out.println("You drank the " + item + ". You feel strange and everything around you starts looking"
+                    + " much larger,");
+        } else if (item.equalsIgnoreCase("cake")) {
+            user.grow();
+            System.out.println("You ate the " + item + ". You feel strange and everything around you starts looking"
+                    + " much smaller.");
+        } else if (item.equalsIgnoreCase("lamp")) {
+            user.getCharacterLocation().lightsOn();
+            System.out.println("You can now see your surroundings.");
+        } else {
+            System.out.println("Sorry, you cannot use " + item + " now.");
+        }
+    }
+
+    private void dropItem(String item) {
+        Locations currentLoc = user.getCharacterLocation();
+        // Check to see if item is currently held in user's inventory.
+        if (user.itemInInventory(item)) {
+            // If so, remove it from user inventory and add it to location inventory.
+            currentLoc.getLocationInventory().add((item));
+            user.getInventory().remove(item);
+            System.out.println("You have dropped the " + item);
+        } else {
+            // Else, let user know that item is not currently in their inventory.
+            System.out.println("You cannot drop the " + item + " because it is not in your inventory.");
+        }
+    }
+
+    private void takeItem(String item) {
+        Locations currentLoc = user.getCharacterLocation();
+        // Check to see if item is held in user's current location's inventory
+        if (currentLoc.itemInInventory(item)) {
+            // If so, remove it from location inventory and add it to user inventory.
+            user.getInventory().add(item);
+            currentLoc.getLocationInventory().remove(item);
+            System.out.println(item + " has been added to your inventory");
+        } else {
+            // Else, let user know that item is not available in this location.
+            System.out.println("Cannot add the " + item + " to your inventory. It is not present in this location.");
+        }
+    }
+
+    private void look() {
+        System.out.println(user.getCharacterLocation().getDescription());
     }
 
 }
