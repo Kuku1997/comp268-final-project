@@ -1,8 +1,0 @@
-go
-take
-drop
-drink
-eat
-talk to
-look
-quit

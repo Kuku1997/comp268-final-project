@@ -4,13 +4,12 @@ public class Locations {
 
     private final String name;
     private final String description;
-    private final int north, east, south, west;
+    private final Exits north, east, south, west;
     private final ArrayList<String> locationInventory = new ArrayList<>();
-
     private boolean lightsOn;
 
-    public Locations(String name, String description, int north, int east,
-                     int south, int west) {
+    public Locations(String name, String description, Exits north, Exits east,
+                     Exits south, Exits west) {
         this.name = name;
         this.description = description;
         this.north = north;
@@ -44,19 +43,19 @@ public class Locations {
     }
 
     public int getNorth() {
-        return north;
+        return north.getExitLeadsTo();
     }
 
     public int getEast() {
-        return east;
+        return east.getExitLeadsTo();
     }
 
     public int getSouth() {
-        return south;
+        return south.getExitLeadsTo();
     }
 
     public int getWest() {
-        return west;
+        return west.getExitLeadsTo();
     }
 
 }

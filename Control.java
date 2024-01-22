@@ -19,12 +19,22 @@ public class Control {
     // Fills arrayList 'map' with Locations objects that will represent a map
     // of rooms in this game.
     private void fillMap() {
-        map.add(new Locations("Meadow", description, -1, -1, 1, -1));
-        map.add(new Locations("Bottom of tunnel", description, -1, 2, -1, -1));
-        map.add(new Locations("Woods", description, 5, 3, 4, -1));
-        map.add(new Locations("House", description, -1, -1, 4, 2));
-        map.add(new Locations("Queen's Court", description, -1, 3, -1, -1));
-        map.add(new Locations("Tea Party", description, -1, 2, -1, -1));
+        map.add(new Locations("Meadow", description, new Exits(-1), new Exits(-1),
+                new Exits(1), new Exits(-1)));
+        map.add(new Locations("Bottom of tunnel", description, new Exits(-1), new Exits(2),
+                new Exits(-1), new Exits(-1)));
+        //map.add(new Locations("Woods", description, 5, 3, 4, -1));
+        map.add(new Locations("Woods", description, new Exits(5), new Exits(3),
+                new Exits(4), new Exits(-1)));
+        //map.add(new Locations("House", description, -1, -1, 4, 2));
+        map.add(new Locations("House", description, new Exits(-1), new Exits(-1),
+                new Exits(4), new Exits(2)));
+        //map.add(new Locations("Queen's Court", description, -1, 3, -1, -1));
+        map.add(new Locations("Queen's Court", description, new Exits(-1), new Exits(3),
+                new Exits(-1), new Exits(-1)));
+        //map.add(new Locations("Tea Party", description, -1, 2, -1, -1));
+        map.add(new Locations("Tea Party", description, new Exits(-1), new Exits(2),
+                new Exits(-1), new Exits(-1)));
     }
 
     private void fillCharacterList() {
@@ -118,10 +128,12 @@ public class Control {
 
     private void enterNewLocation(Locations newLocation) {
         System.out.println(newLocation.getDescription());
-        System.out.println("You can see the following items: ");
-        // Print each item in newLocation inventory
-        for (String item : newLocation.getLocationInventory()) {
-            System.out.println("    -" + item);
+        // Print each item in newLocation inventory (if inventory is not-empty)
+        if (!newLocation.getLocationInventory().isEmpty()) {
+            System.out.println("You can see the following items: ");
+            for (String item : newLocation.getLocationInventory()) {
+                System.out.println("    -" + item);
+            }
         }
     }
 
