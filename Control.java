@@ -21,11 +21,11 @@ public class Control {
     private void fillMap() {
         map.add(new Locations("Meadow", description, new Exits(-1), new Exits(-1),
                 new Exits(1), new Exits(-1)));
-        map.add(new Locations("Bottom of tunnel", description, new Exits(-1), new Exits(2),
-                new Exits(-1), new Exits(-1)));
+        map.add(new Locations("Bottom of tunnel", description, new Exits(-1),
+                new Exits(true,true,2), new Exits(-1), new Exits(-1)));
         //map.add(new Locations("Woods", description, 5, 3, 4, -1));
-        map.add(new Locations("Woods", description, new Exits(5), new Exits(3),
-                new Exits(4), new Exits(-1)));
+        map.add(new Locations("Woods", description, new Exits(5),
+                new Exits(true,false,3), new Exits(4), new Exits(-1)));
         //map.add(new Locations("House", description, -1, -1, 4, 2));
         map.add(new Locations("House", description, new Exits(-1), new Exits(-1),
                 new Exits(4), new Exits(2)));
@@ -84,19 +84,19 @@ public class Control {
         direction = direction.toLowerCase();
         switch (direction) {
             case "north", "n" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getNorth();
+                currentLocationDirectionValue = user.getCharacterLocation().getNorthernLocation();
                 direction = "north";
             }
             case "east", "e" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getEast();
+                currentLocationDirectionValue = user.getCharacterLocation().getEasternLocation();
                 direction = "east";
             }
             case "south", "s" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getSouth();
+                currentLocationDirectionValue = user.getCharacterLocation().getSouthernLocation();
                 direction = "south";
             }
             case "west", "w" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getWest();
+                currentLocationDirectionValue = user.getCharacterLocation().getWesternLocation();
                 direction = "west";
             }
             default -> {
