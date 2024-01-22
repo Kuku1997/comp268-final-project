@@ -22,10 +22,10 @@ public class Control {
         map.add(new Locations("Meadow", description, new Exits(-1), new Exits(-1),
                 new Exits(1), new Exits(-1)));
         map.add(new Locations("Bottom of tunnel", description, new Exits(-1),
-                new Exits(true,true,2), new Exits(-1), new Exits(-1)));
+                new Exits(true, true, 2), new Exits(-1), new Exits(-1)));
         //map.add(new Locations("Woods", description, 5, 3, 4, -1));
         map.add(new Locations("Woods", description, new Exits(5),
-                new Exits(true,false,3), new Exits(4), new Exits(-1)));
+                new Exits(true, false, 3), new Exits(4), new Exits(-1)));
         //map.add(new Locations("House", description, -1, -1, 4, 2));
         map.add(new Locations("House", description, new Exits(-1), new Exits(-1),
                 new Exits(4), new Exits(2)));
@@ -69,7 +69,7 @@ public class Control {
         } else if (commands[0].equals(actions.get(3)) || commands[0].equals(actions.get(4))) { // command = "eat" or "drink"
             this.useItem(commands[commands.length - 1]);
         } else if (commands[0].equals(actions.get(5))) { // command = "talk"
-            talkTo(commands[commands.length - 1]);
+            this.talkTo(commands[commands.length - 1]);
         } else if (commands[0].equals(actions.get(6))) { // command = "look"
             this.look();
         } else { // If command is not recognized.
@@ -78,26 +78,38 @@ public class Control {
     }
 
     public void movePlayer(String direction) {
-        int currentLocationDirectionValue; // value of N,E,S,W for current location.
+        int currentLocationDirectionValue; // value of N,E,S,W for current location, that corresponds to Locations
+        // object's index in arrayList<> map.
+
         // Converts user input to valid direction value that program will
         // recognize.
         direction = direction.toLowerCase();
+        Locations currentLocation = user.getCharacterLocation();
+        boolean locked, small;
         switch (direction) {
             case "north", "n" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getNorthernLocation();
+                currentLocationDirectionValue = currentLocation.getNorthernLocation();
                 direction = "north";
+                locked = currentLocation.getNorth().isLocked();
+                small = currentLocation.getNorth().isSmall();
             }
             case "east", "e" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getEasternLocation();
+                currentLocationDirectionValue = currentLocation.getEasternLocation();
                 direction = "east";
+                locked = currentLocation.getEast().isLocked();
+                small = currentLocation.getEast().isSmall();
             }
             case "south", "s" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getSouthernLocation();
+                currentLocationDirectionValue = currentLocation.getSouthernLocation();
                 direction = "south";
+                locked = currentLocation.getSouth().isLocked();
+                small = currentLocation.getSouth().isSmall();
             }
             case "west", "w" -> {
-                currentLocationDirectionValue = user.getCharacterLocation().getWesternLocation();
+                currentLocationDirectionValue = currentLocation.getWesternLocation();
                 direction = "west";
+                locked = currentLocation.getWest().isLocked();
+                small = currentLocation.getWest().isSmall();
             }
             default -> {
                 System.out.println(direction + " is not a valid direction.");
@@ -105,10 +117,19 @@ public class Control {
             }
         }
 
-        // If user entered valid direction, updateLocation() will change user's current location.
-        updateLocation(direction, currentLocationDirectionValue);
-
+        // If user entered valid direction, and exit in that direction is not locked/small,
+        // updateLocation() will change user's current location.
+        if (locked) {
+            System.out.println("You try to open the door, but it is locked.");
+            return;
+        } else if (small) {
+            System.out.println("The door is tiny, barely big enough for a mouse. You'll never fit.");
+            return;
+        } else {
+            updateLocation(direction, currentLocationDirectionValue);
+        }
     }
+
 
     // If characterLocation direction value equal -1, there
     // is no exit in that direction.
@@ -137,10 +158,6 @@ public class Control {
         }
     }
 
-
-    private void talkTo(String character) {
-    }
-
     private void useItem(String item) {
         // Check to see if item is current in user's inventory
         if (!user.itemInInventory(item)) {
@@ -159,7 +176,7 @@ public class Control {
         } else if (item.equalsIgnoreCase("lamp")) {
             user.getCharacterLocation().lightsOn();
             System.out.println("You can now see your surroundings.");
-        } else {
+    } else {
             System.out.println("Sorry, you cannot use " + item + " now.");
         }
     }
@@ -190,6 +207,9 @@ public class Control {
             // Else, let user know that item is not available in this location.
             System.out.println("Cannot add the " + item + " to your inventory. It is not present in this location.");
         }
+    }
+
+    private void talkTo(String character) {
     }
 
     private void look() {
