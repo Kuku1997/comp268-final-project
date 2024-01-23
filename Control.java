@@ -3,10 +3,10 @@ import java.util.Scanner;
 
 public class Control {
 
-    public final ArrayList<Locations> map = new ArrayList<>();
-    public ArrayList<Characters> characterList;
     public static Player user;
+    public final ArrayList<Locations> map = new ArrayList<>();
     private final Actions actions = new Actions();
+    public ArrayList<Characters> characterList;
     String description = "test description";
 
     // Used to start new game.
@@ -22,10 +22,10 @@ public class Control {
         map.add(new Locations("Meadow", description, new Exits(-1), new Exits(-1),
                 new Exits(1), new Exits(-1)));
         map.add(new Locations("Bottom of tunnel", description, new Exits(-1),
-                new Exits(true, true, 2), new Exits(-1), new Exits(-1)));
+                new Exits(true, true, 2, "small key"), new Exits(-1), new Exits(-1)));
         //map.add(new Locations("Woods", description, 5, 3, 4, -1));
         map.add(new Locations("Woods", description, new Exits(5),
-                new Exits(true, false, 3), new Exits(4), new Exits(-1)));
+                new Exits(true, false, 3, "house key"), new Exits(4), new Exits(-1)));
         //map.add(new Locations("House", description, -1, -1, 4, 2));
         map.add(new Locations("House", description, new Exits(-1), new Exits(-1),
                 new Exits(4), new Exits(2)));
@@ -85,31 +85,27 @@ public class Control {
         // recognize.
         direction = direction.toLowerCase();
         Locations currentLocation = user.getCharacterLocation();
-        boolean locked, small;
+        Exits exit;
         switch (direction) {
             case "north", "n" -> {
                 currentLocationDirectionValue = currentLocation.getNorthernLocation();
                 direction = "north";
-                locked = currentLocation.getNorth().isLocked();
-                small = currentLocation.getNorth().isSmall();
+                exit = currentLocation.getNorth();
             }
             case "east", "e" -> {
                 currentLocationDirectionValue = currentLocation.getEasternLocation();
                 direction = "east";
-                locked = currentLocation.getEast().isLocked();
-                small = currentLocation.getEast().isSmall();
+                exit = currentLocation.getEast();
             }
             case "south", "s" -> {
                 currentLocationDirectionValue = currentLocation.getSouthernLocation();
                 direction = "south";
-                locked = currentLocation.getSouth().isLocked();
-                small = currentLocation.getSouth().isSmall();
+                exit = currentLocation.getSouth();
             }
             case "west", "w" -> {
                 currentLocationDirectionValue = currentLocation.getWesternLocation();
                 direction = "west";
-                locked = currentLocation.getWest().isLocked();
-                small = currentLocation.getWest().isSmall();
+                exit = currentLocation.getWest();
             }
             default -> {
                 System.out.println(direction + " is not a valid direction.");
@@ -119,12 +115,11 @@ public class Control {
 
         // If user entered valid direction, and exit in that direction is not locked/small,
         // updateLocation() will change user's current location.
-        if (locked) {
+        if (exit.isLocked()) {
             System.out.println("You try to open the door, but it is locked.");
-            return;
-        } else if (small) {
+            this.unlockDoor(exit);
+        } else if (exit.isSmall()) {
             System.out.println("The door is tiny, barely big enough for a mouse. You'll never fit.");
-            return;
         } else {
             updateLocation(direction, currentLocationDirectionValue);
         }
@@ -152,9 +147,7 @@ public class Control {
         // Print each item in newLocation inventory (if inventory is not-empty)
         if (!newLocation.getLocationInventory().isEmpty()) {
             System.out.println("You can see the following items: ");
-            for (String item : newLocation.getLocationInventory()) {
-                System.out.println("    -" + item);
-            }
+            newLocation.getLocationInventory().listInventory();
         }
     }
 
@@ -176,7 +169,7 @@ public class Control {
         } else if (item.equalsIgnoreCase("lamp")) {
             user.getCharacterLocation().lightsOn();
             System.out.println("You can now see your surroundings.");
-    } else {
+        } else {
             System.out.println("Sorry, you cannot use " + item + " now.");
         }
     }
@@ -210,6 +203,18 @@ public class Control {
     }
 
     private void talkTo(String character) {
+    }
+
+    private void unlockDoor(Exits exit) {
+        String key = exit.getKey();
+        if (user.itemInInventory(key)) {
+            exit.unlockExit();
+            System.out.println("You have a " + key + " in your inventory. You successfully unlock the door, but the key gets " +
+                    "stuck in the keyhole.");
+            user.getInventory().remove("Key");
+        } else {
+            System.out.println("You need a " + key + " to unlock this door. You currently do not have one in your inventory.");
+        }
     }
 
     private void look() {

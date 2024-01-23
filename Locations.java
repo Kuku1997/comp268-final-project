@@ -6,7 +6,7 @@ public class Locations {
     private final String description;
     private final Exits north, east, south, west;
     private int northernLocation, easternLocation, southernLocation, westernLocation;
-    private final ArrayList<String> locationInventory = new ArrayList<>();
+    private Inventory locationInventory;
     private boolean lightsOn;
 
     public Locations(String name, String description, Exits north, Exits east,
@@ -18,6 +18,7 @@ public class Locations {
         this.south = south;
         this.west = west;
         initializeDirectionLocations();
+        this.locationInventory = new Inventory();
     }
 
     private void initializeDirectionLocations(){
@@ -36,7 +37,7 @@ public class Locations {
         return description;
     }
 
-    public ArrayList<String> getLocationInventory() {
+    public Inventory getLocationInventory() {
         return locationInventory;
     }
 
@@ -79,7 +80,7 @@ public class Locations {
     // METHODS
 
     public Boolean itemInInventory(String item) {
-        return this.locationInventory.contains(item);
+        return this.locationInventory.containsItem(item);
     }
 
     public void lightsOn() {
